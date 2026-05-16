@@ -109,7 +109,7 @@ async def _do_search(message: discord.Message, keyword: str):
     lines = ["**🛒 Productos encontrados:**"]
     for item in items:
         price = format_price(item.get("price_usd", ""))
-        lines.append(f"• **{item['name']}** {price}\n  {item['link']}")
+        lines.append(f"• **{item['name']}** {price}\n  <{item['link']}>")
 
     await thinking.edit(content="\n".join(lines))
 
