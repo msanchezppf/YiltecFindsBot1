@@ -15,42 +15,13 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 ALLOWED_CHANNELS: set[int] = set()
 waiting_for_keyword: dict[int, int] = {}
-
 PREFIX = "yiltec:"
-
-USD_TO_EUR = 0.92
-
-
-async def fetch_exchange_rate():
-    global USD_TO_EUR
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                "https://api.frankfurter.app/latest?from=USD&to=EUR",
-                timeout=aiohttp.ClientTimeout(total=5)
-            ) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    USD_TO_EUR = data["rates"]["EUR"]
-                    print(f"💱 Tipo de cambio: 1 USD = {USD_TO_EUR:.4f} EUR")
-    except Exception as e:
-        print(f"⚠️  Tipo de cambio por defecto ({USD_TO_EUR}): {e}")
-
-
-def format_price(price_usd: str) -> str:
-    if not price_usd:
-        return ""
-    try:
-        return f"💶 {float(price_usd) * USD_TO_EUR:.2f}€"
-    except:
-        return ""
 
 
 @bot.event
 async def on_ready():
-    await fetch_exchange_rate()
     print(f"✅ Bot conectado como {bot.user} (ID: {bot.user.id})")
-    print(f"🔍 Escuchando mensajes que empiecen por '{PREFIX}'")
+    print(f"🔍 Escuchando mensajes con '{PREFIX}'")
 
 
 @bot.event
@@ -68,7 +39,7 @@ async def on_message(message: discord.Message):
     )
     text = message.content.strip()
 
-    # ── Solo foto → pedir nombre con prefijo ─────────────────────────────────
+    # Solo foto → pedir nombre
     if has_image and not text:
         waiting_for_keyword[message.author.id] = message.channel.id
         await message.reply(
@@ -77,11 +48,11 @@ async def on_message(message: discord.Message):
         )
         return
 
-    # ── Ignorar mensajes sin el prefijo ──────────────────────────────────────
+    # Ignorar mensajes sin el prefijo
     if not text.lower().startswith(PREFIX):
         return
 
-    # ── Extraer keyword tras el prefijo ──────────────────────────────────────
+    # Extraer keyword
     keyword = text[len(PREFIX):].strip()
     if not keyword:
         await message.reply(
@@ -108,7 +79,7 @@ async def _do_search(message: discord.Message, keyword: str):
 
     lines = ["**🛒 Productos encontrados:**"]
     for item in items:
-        price = format_price(item.get("price_usd", ""))
+        price = f"💶 {item['price_eur']}€" if item.get('price_eur') else ""
         lines.append(f"• **{item['name']}** {price}\n  <{item['link']}>")
 
     await thinking.edit(content="\n".join(lines))

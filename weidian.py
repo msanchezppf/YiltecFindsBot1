@@ -40,7 +40,6 @@ def search_catalog(keyword: str) -> list[dict]:
 
     scored.sort(key=lambda x: x[0], reverse=True)
 
-    # Deduplicar por link
     seen, unique = set(), []
     for _, item in scored:
         if item['link'] not in seen:
