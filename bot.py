@@ -15,7 +15,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 ALLOWED_CHANNELS: set[int] = set()
 waiting_for_keyword: dict[int, int] = {}
-PREFIX = "yiltec:"
+PREFIX = "producto:"
 
 
 @bot.event
